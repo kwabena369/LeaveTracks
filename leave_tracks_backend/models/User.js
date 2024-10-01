@@ -1,9 +1,9 @@
 //   this is the schema for Registered users
-const mongoose = require("mongoose");
+let mongoose = require("mongoose");
 const bcrypt = require("bcryptjs")
  
 //  the schema for user 
-const UserScheman= new mongoose.Schema({
+const UserSchema= new mongoose.Schema({
     usename: 
     {
         type: String,
@@ -42,7 +42,7 @@ const UserScheman= new mongoose.Schema({
      }
 })
 //  before the user is saved into the db we encrypt the password
-Userscheman.pre("save", async(next) => {
+UserSchema.pre("save", async(next) => {
     if (this.isModified("password")) {
         //    the changing of the password
         this.password = await bcrypt.hash(this.password,10)
@@ -50,4 +50,4 @@ Userscheman.pre("save", async(next) => {
      next()
 })  
 // exporting the things
-module.exports =  mongoose.model("User",UserScheman)
+module.exports =  mongoose.model("User",UserSchema)

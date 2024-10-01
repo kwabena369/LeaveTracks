@@ -1,5 +1,5 @@
 //   this schma is for storing of memories
-const mongoose = require("mongoose");
+let mongoose = require("mongoose");
 
 //  the information 
 

@@ -1,9 +1,7 @@
 // models/Coordinates.js
-const mongoose = require("mongoose");
+let mongoose = require("mongoose");
 
-const mongoose = require("mongoose");
-const CoordinateSchema = require("./Coordinates");
-
+const CoordinateSchema = require("./Cordinates")
 const RouteSchema = new mongoose.Schema({
   Author_Route: {
     type: mongoose.Schema.Types.ObjectId,
