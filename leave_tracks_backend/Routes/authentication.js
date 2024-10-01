@@ -20,3 +20,6 @@ AuthenticationRouter.get("/AllUser",  async(req,res)=>{
          })
      }
 })
+
+
+module.exports = AuthenticationRouter

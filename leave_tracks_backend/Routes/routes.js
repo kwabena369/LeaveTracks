@@ -7,6 +7,15 @@ const RouteSchema = require("../models/Routes");
 const CordinateSchema = require("../models/Cordinates")
  
 
+//  for the default thing when someone is here
+RouteSchema.get("/", (req,res) => {
+    console.log(req)
+    res.status(200).json({
+         message : "it isdone in the back"
+    })
+})
+
+
 //   for the sake of _debuging
 Route_Router.get("/All_Routes", async (req,res)=>{
      

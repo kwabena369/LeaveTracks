@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 //  the information 
 
-const MemorySchema = await mongoose.Schema({
+const MemorySchema = new  mongoose.Schema({
     User: {
         require: true,
         type: mongoose.Schema.Types.ObjectId,
