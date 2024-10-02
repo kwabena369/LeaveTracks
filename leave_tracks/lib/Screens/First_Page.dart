@@ -85,6 +85,8 @@ class _LocationDisplayWidgetState extends State<LocationDisplayWidget> {
                 await _updateLocation();
                 if (latitude != null && longitude != null) {
                   await httpHelper.sendLocation(latitude!, longitude!);
+                  //  the send location btn is going to be close  like more than one time 
+                  //   it is going t 
                 }
               },
               child: const Text('Send Location'),
