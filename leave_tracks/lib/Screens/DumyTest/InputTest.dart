@@ -11,6 +11,9 @@ class InputTest extends StatefulWidget {
 class _InputTestState extends State<InputTest> {
   String inputValue = '';
 
+//  return statement .
+  String returnStatement = "";
+
   void handleChangeInput(String value) {
     setState(() {
       inputValue = value;
@@ -20,7 +23,9 @@ class _InputTestState extends State<InputTest> {
   // the instance of the httper helper
 
   Future<void> SendInformation() async {
-    await HttpHelper().SendContent(inputValue);
+    setState(() async {
+      returnStatement = await HttpHelper().SendContent(inputValue);
+    });
   }
 
   @override
@@ -41,7 +46,10 @@ class _InputTestState extends State<InputTest> {
               ),
               const SizedBox(height: 20),
               Text(inputValue),
-              SizedBox(
+
+              const SizedBox(height: 20),
+              Text(returnStatement),
+              const SizedBox(
                 height: 12,
               ),
               //  the btn for sending the information

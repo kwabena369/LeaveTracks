@@ -48,8 +48,7 @@ class HttpHelper {
     }
   }
 
-//  sending of users iinforation to the backend.
-  Future<void> SendContent(String content) async {
+  Future<String> SendContent(String content) async {
 // the first instance of the action to send the inforamtion
 
     final golden = await http.post(Uri.parse("$baseUrl/Content"),
@@ -57,5 +56,10 @@ class HttpHelper {
         body: json.encode({"Content": content}));
 // then console  for the responce
     print(golden);
+    if (golden.statusCode == 200) {
+      return golden.body;
+    } else {
+      return "Error";
+    }
   }
 }
