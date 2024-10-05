@@ -23,7 +23,6 @@ class _InputTestState extends State<InputTest> {
     await HttpHelper().SendContent(inputValue);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,6 +41,21 @@ class _InputTestState extends State<InputTest> {
               ),
               const SizedBox(height: 20),
               Text(inputValue),
+              SizedBox(
+                height: 12,
+              ),
+              //  the btn for sending the information
+              ElevatedButton(
+                  onPressed: () {
+                    SendInformation();
+                  },
+                  child: const Text(
+                    "SendInfo",
+                    style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.w100,
+                        fontSize: 12),
+                  ))
             ],
           ),
         ));
