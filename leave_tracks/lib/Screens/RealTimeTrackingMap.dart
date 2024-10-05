@@ -12,26 +12,23 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   gmaps.GoogleMapController? _mapController;
   Position? _currentPosition;
   Set<gmaps.Marker> _markers = {};
-  Set<gmaps.Polyline> _polylines = {};
   List<gmaps.LatLng> _polylineCoordinates = [];
-  StreamSubscription<Position>? _positionStreamSubscription;
-  final double _distanceThreshold = 1.22; // Distance in meters (approx. 4 feet)
-  String _errorMessage = '';
+  String _debugInfo = '';
+  final double _distanceThreshold = 3.048; // Distance in meters (10 feet)
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocationAndStartTracking();
+    _getCurrentLocation();
   }
 
   @override
   void dispose() {
-    _positionStreamSubscription?.cancel();
     _mapController?.dispose();
     super.dispose();
   }
 
-  Future<void> _getCurrentLocationAndStartTracking() async {
+  Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -53,41 +50,42 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
         throw Exception('Location permissions are permanently denied');
       }
 
-      setState(() {
-        _errorMessage = 'Getting current location...';
-      });
+      _setDebugInfo('Getting current location...');
 
       _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 5),
+        desiredAccuracy: LocationAccuracy.best,
       );
 
       _updatePosition(_currentPosition!);
 
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 1,
-      );
-
-      _positionStreamSubscription =
-          Geolocator.getPositionStream(locationSettings: locationSettings)
-              .listen(
-        _updatePosition,
-        onError: (e) {
-          setState(() {
-            _errorMessage = 'Error getting location updates: $e';
-          });
-        },
-        cancelOnError: false,
-      );
-
-      setState(() {
-        _errorMessage = '';
-      });
+      _setDebugInfo('Initial location set');
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      _setDebugInfo('Error: ${e.toString()}');
+    }
+  }
+
+  void _markMilestone() async {
+    try {
+      Position newPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      double distance = _calculateDistance(
+        gmaps.LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+        gmaps.LatLng(newPosition.latitude, newPosition.longitude),
+      );
+
+      _setDebugInfo(
+          'Distance from last milestone: ${distance.toStringAsFixed(2)} meters');
+
+      if (distance >= _distanceThreshold) {
+        _updatePosition(newPosition);
+        _setDebugInfo('New milestone marked');
+      } else {
+        _setDebugInfo('Milestone not marked: Distance less than 10 feet');
+      }
+    } catch (e) {
+      _setDebugInfo('Error marking milestone: ${e.toString()}');
     }
   }
 
@@ -97,17 +95,14 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       final gmaps.LatLng newPosition =
           gmaps.LatLng(position.latitude, position.longitude);
 
-      if (_polylineCoordinates.isEmpty ||
-          _calculateDistance(_polylineCoordinates.last, newPosition) >=
-              _distanceThreshold) {
-        _polylineCoordinates.add(newPosition);
-        _updatePolylines();
-        _addMarker(newPosition);
-      }
-    });
+      _polylineCoordinates.add(newPosition);
+      _addMarker(newPosition);
 
-    _mapController?.animateCamera(gmaps.CameraUpdate.newLatLng(
-        gmaps.LatLng(position.latitude, position.longitude)));
+      _mapController?.animateCamera(gmaps.CameraUpdate.newLatLng(newPosition));
+
+      _setDebugInfo(
+          'Position updated: ${position.latitude}, ${position.longitude}');
+    });
   }
 
   double _calculateDistance(gmaps.LatLng start, gmaps.LatLng end) {
@@ -133,18 +128,11 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     });
   }
 
-  void _updatePolylines() {
-    final polyline = gmaps.Polyline(
-      polylineId: gmaps.PolylineId('track'),
-      color: Colors.blue,
-      points: _polylineCoordinates,
-      width: 5,
-    );
-
+  void _setDebugInfo(String info) {
     setState(() {
-      _polylines.clear();
-      _polylines.add(polyline);
+      _debugInfo = info;
     });
+    print(info); // Also print to console for easier debugging
   }
 
   @override
@@ -153,27 +141,47 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       appBar: AppBar(
         title: Text('Explorer Tracking Map'),
       ),
-      body: _errorMessage.isNotEmpty
-          ? Center(child: Text(_errorMessage))
-          : _currentPosition == null
-              ? Center(child: CircularProgressIndicator())
-              : gmaps.GoogleMap(
-                  initialCameraPosition: gmaps.CameraPosition(
-                    target: gmaps.LatLng(_currentPosition!.latitude,
-                        _currentPosition!.longitude),
-                    zoom: 18, // Increased zoom for better detail
+      body: Column(
+        children: [
+          Expanded(
+            child: _currentPosition == null
+                ? Center(child: CircularProgressIndicator())
+                : gmaps.GoogleMap(
+                    initialCameraPosition: gmaps.CameraPosition(
+                      target: gmaps.LatLng(_currentPosition!.latitude,
+                          _currentPosition!.longitude),
+                      zoom: 18,
+                    ),
+                    onMapCreated: (gmaps.GoogleMapController controller) {
+                      _mapController = controller;
+                    },
+                    markers: _markers,
+                    polylines: {
+                      gmaps.Polyline(
+                        polylineId: gmaps.PolylineId('track'),
+                        color: Colors.blue,
+                        points: _polylineCoordinates,
+                        width: 5,
+                      ),
+                    },
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
                   ),
-                  onMapCreated: (gmaps.GoogleMapController controller) {
-                    _mapController = controller;
-                  },
-                  markers: _markers,
-                  polylines: _polylines,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                ),
+          ),
+          Container(
+            padding: EdgeInsets.all(8),
+            color: Colors.black87,
+            width: double.infinity,
+            child: Text(
+              _debugInfo,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getCurrentLocationAndStartTracking,
-        child: Icon(Icons.my_location),
+        onPressed: _markMilestone,
+        child: Icon(Icons.add_location),
       ),
     );
   }

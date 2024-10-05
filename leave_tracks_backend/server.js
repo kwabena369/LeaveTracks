@@ -26,6 +26,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Leave Tracks Backend' });
 });
 
+//  handling of the user inforamtion for the 
+app.post("/Content", (req, res) => {
+  console.log(req.body);
+  res.status(200).json({
+     message  : "ghost are real"
+  })
+})
+
 app.post('/test', (req, res) => {
   console.log('Received message:', req.body.message);
   res.json({ status: 'Message received', message: req.body.message });

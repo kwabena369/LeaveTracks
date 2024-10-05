@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 class HttpHelper {
   static const String baseUrl = 'https://leave-tracks-backend.vercel.app';
 
@@ -43,5 +46,16 @@ class HttpHelper {
     } catch (e) {
       print('Exception: $e');
     }
+  }
+
+//  sending of users iinforation to the backend.
+  Future<void> SendContent(String content) async {
+// the first instance of the action to send the inforamtion
+
+    final golden = await http.post(Uri.parse("$baseUrl/Content"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({"Content": content}));
+// then console  for the responce
+    print(golden);
   }
 }
