@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:geolocator/geolocator.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:async';
+import 'dart:math';
 
 class RealTimeTrackingMap extends StatefulWidget {
   @override
@@ -14,17 +16,32 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   Set<gmaps.Marker> _markers = {};
   List<gmaps.LatLng> _polylineCoordinates = [];
   String _debugInfo = '';
-  final double _distanceThreshold = 3.048; // Distance in meters (10 feet)
+  final double _distanceThreshold = 5.0; // Distance in meters
   Position? _lastRecordedPosition;
+  late StreamSubscription<Position> _positionStreamSubscription;
+  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+
+  // Kalman filter variables
+  double _qValue = 3.0; // process noise
+  double _rValue = 50.0; // measurement noise
+  double _xEstimate = 0.0; // estimated value
+  double _pEstimate = 1.0; // estimation error covariance
+  bool _isMoving = false;
+  DateTime? _lastUpdateTime;
+  final _updateInterval = Duration(seconds: 5);
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _startListeningToLocationUpdates();
+    _startListeningToAccelerometer();
   }
 
   @override
   void dispose() {
+    _positionStreamSubscription.cancel();
+    _accelerometerSubscription.cancel();
     _mapController?.dispose();
     super.dispose();
   }
@@ -54,7 +71,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       _setDebugInfo('Getting current location...');
 
       _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: LocationAccuracy.best,
       );
 
       _updatePosition(_currentPosition!);
@@ -65,37 +82,93 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     }
   }
 
-  void _markMilestone() async {
-    try {
-      Position newPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+  void _startListeningToLocationUpdates() {
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 5,
+    );
+
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position position) {
+      _processNewPosition(position);
+    });
+  }
+
+  void _startListeningToAccelerometer() {
+    _accelerometerSubscription =
+        accelerometerEvents.listen((AccelerometerEvent event) {
+      final double acceleration =
+          sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      _isMoving = acceleration > 10.5; // Adjust this threshold as needed
+    });
+  }
+
+  void _processNewPosition(Position newPosition) {
+    if (_lastUpdateTime != null &&
+        DateTime.now().difference(_lastUpdateTime!) < _updateInterval) {
+      return;
+    }
+
+    if (newPosition.accuracy > 20 || !_isMoving) {
+      _setDebugInfo('Low accuracy or not moving, ignoring update.');
+      return;
+    }
+
+    double filteredLatitude = _applyKalmanFilter(newPosition.latitude);
+    double filteredLongitude = _applyKalmanFilter(newPosition.longitude);
+
+    Position filteredPosition = Position(
+      latitude: filteredLatitude,
+      longitude: filteredLongitude,
+      timestamp: newPosition.timestamp,
+      accuracy: newPosition.accuracy,
+      altitude: newPosition.altitude,
+      heading: newPosition.heading,
+      speed: newPosition.speed,
+      speedAccuracy: newPosition.speedAccuracy,
+      floor: newPosition.floor,
+      isMocked: newPosition.isMocked,
+      // New required parameters
+      altitudeAccuracy: newPosition.altitudeAccuracy,
+      headingAccuracy: newPosition.headingAccuracy,
+    );
+
+    if (_lastRecordedPosition != null) {
+      double distance = _calculateDistance(
+        gmaps.LatLng(
+            _lastRecordedPosition!.latitude, _lastRecordedPosition!.longitude),
+        gmaps.LatLng(filteredPosition.latitude, filteredPosition.longitude),
       );
 
-      if (_lastRecordedPosition != null) {
-        double distance = _calculateDistance(
-          gmaps.LatLng(_lastRecordedPosition!.latitude,
-              _lastRecordedPosition!.longitude),
-          gmaps.LatLng(newPosition.latitude, newPosition.longitude),
-        );
+      _setDebugInfo(
+          'Distance: ${distance.toStringAsFixed(2)}m, Accuracy: ${newPosition.accuracy.toStringAsFixed(2)}m, Moving: $_isMoving');
 
-        _setDebugInfo(
-            'Distance from last milestone: ${distance.toStringAsFixed(2)} meters');
-
-        if (distance >= _distanceThreshold) {
-          _updatePosition(newPosition);
-          _lastRecordedPosition = newPosition;
-          _setDebugInfo('New milestone marked');
-        } else {
-          _setDebugInfo('Milestone not marked: Distance less than 10 feet');
-        }
-      } else {
-        _updatePosition(newPosition);
-        _lastRecordedPosition = newPosition;
-        _setDebugInfo('First milestone marked');
+      if (distance >= _distanceThreshold) {
+        _updatePosition(filteredPosition);
+        _lastRecordedPosition = filteredPosition;
+        _setDebugInfo('New position marked');
       }
-    } catch (e) {
-      _setDebugInfo('Error marking milestone: ${e.toString()}');
+    } else {
+      _updatePosition(filteredPosition);
+      _lastRecordedPosition = filteredPosition;
+      _setDebugInfo('First position marked');
     }
+
+    _lastUpdateTime = DateTime.now();
+  }
+
+  double _applyKalmanFilter(double measurement) {
+    // Prediction
+    double xPredicted = _xEstimate;
+    double pPredicted = _pEstimate + _qValue;
+
+    // Update
+    double k = pPredicted / (pPredicted + _rValue);
+    _xEstimate = xPredicted + k * (measurement - xPredicted);
+    _pEstimate = (1 - k) * pPredicted;
+
+    return _xEstimate;
   }
 
   void _updatePosition(Position position) {
@@ -141,14 +214,14 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     setState(() {
       _debugInfo = info;
     });
-    print(info); // Also print to console for easier debugging
+    print(info);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Explorer Tracking Map'),
+        title: Text('Intelligent Explorer Tracking'),
       ),
       body: Column(
         children: [
@@ -187,10 +260,6 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _markMilestone,
-        child: Icon(Icons.add_location),
       ),
     );
   }

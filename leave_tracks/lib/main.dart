@@ -14,9 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
         // TODO: implement build
-    return const MaterialApp(
+    return MaterialApp(
       title: "Saint",
-      home: InputTest(),
+      home: RealTimeTrackingMap(),
     );
   }
 
