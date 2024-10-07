@@ -15,6 +15,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   List<gmaps.LatLng> _polylineCoordinates = [];
   String _debugInfo = '';
   final double _distanceThreshold = 3.048; // Distance in meters (10 feet)
+  Position? _lastRecordedPosition;
 
   @override
   void initState() {
@@ -53,7 +54,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       _setDebugInfo('Getting current location...');
 
       _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
+        desiredAccuracy: LocationAccuracy.high,
       );
 
       _updatePosition(_currentPosition!);
@@ -67,22 +68,30 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   void _markMilestone() async {
     try {
       Position newPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
+        desiredAccuracy: LocationAccuracy.high,
       );
 
-      double distance = _calculateDistance(
-        gmaps.LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-        gmaps.LatLng(newPosition.latitude, newPosition.longitude),
-      );
+      if (_lastRecordedPosition != null) {
+        double distance = _calculateDistance(
+          gmaps.LatLng(_lastRecordedPosition!.latitude,
+              _lastRecordedPosition!.longitude),
+          gmaps.LatLng(newPosition.latitude, newPosition.longitude),
+        );
 
-      _setDebugInfo(
-          'Distance from last milestone: ${distance.toStringAsFixed(2)} meters');
+        _setDebugInfo(
+            'Distance from last milestone: ${distance.toStringAsFixed(2)} meters');
 
-      if (distance >= _distanceThreshold) {
-        _updatePosition(newPosition);
-        _setDebugInfo('New milestone marked');
+        if (distance >= _distanceThreshold) {
+          _updatePosition(newPosition);
+          _lastRecordedPosition = newPosition;
+          _setDebugInfo('New milestone marked');
+        } else {
+          _setDebugInfo('Milestone not marked: Distance less than 10 feet');
+        }
       } else {
-        _setDebugInfo('Milestone not marked: Distance less than 10 feet');
+        _updatePosition(newPosition);
+        _lastRecordedPosition = newPosition;
+        _setDebugInfo('First milestone marked');
       }
     } catch (e) {
       _setDebugInfo('Error marking milestone: ${e.toString()}');
