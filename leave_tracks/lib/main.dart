@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:leave_tracks/Screens/DumyTest/InputTest.dart';
+import 'package:leave_tracks/Screens/Trips/LandingPage.dart';
 import 'package:leave_tracks/Screens/Trips/RealTimeTrackingMap.dart';
 import 'package:leave_tracks/Screens/First_Page.dart';
 
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
         // TODO: implement build
     return MaterialApp(
       title: "Saint",
-      home: RealTimeTrackingMap(),
+      home: LandingPage(),
     );
   }
 
