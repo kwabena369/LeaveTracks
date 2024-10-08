@@ -18,7 +18,6 @@ mongoose.connect(mongoURI)
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Import routes
-const Route_Router = require("./Routes/routes");
 const Authentication_Router = require("./Routes/authentication");
 
 // Routes
@@ -54,7 +53,11 @@ app.post('/test', (req, res) => {
 });
 
 // Use route modules
-app.use("/Routes", Route_Router);
+app.post("/Routes", (req, res) => {
+  console.log("someone is saving route");
+
+
+});
 app.use("/auth", Authentication_Router);  // Assuming you want to use this router
 
 // Error handling middleware

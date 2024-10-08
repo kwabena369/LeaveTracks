@@ -3,16 +3,22 @@ let mongoose = require("mongoose");
 
 const CoordinateSchema = require("./Cordinates")
 const RouteSchema = new mongoose.Schema({
-  Author_Route: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+  userProfile: {
+    type: String,
+    required: false,
+    default :"/cat.png"
   },
+  userName: {
+    type: String,
+    required: false ,
+    default : "kogi"
+  }
+  ,
   Name_Route: {
     type: String,
     required: true
   },
-  Path_Cordinate: [CoordinateSchema],
+  Path_Cordinate: [],
   createAt: {
     type: Date,
     default: Date.now
