@@ -16,32 +16,28 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   Set<gmaps.Marker> _markers = {};
   List<gmaps.LatLng> _polylineCoordinates = [];
   String _debugInfo = '';
-  final double _distanceThreshold = 5.0; // Distance in meters
+  final double _distanceThreshold = 9.144; // 30 feet in meters
   Position? _lastRecordedPosition;
-  late StreamSubscription<Position> _positionStreamSubscription;
-  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
-
-  // Kalman filter variables
-  double _qValue = 3.0; // process noise
-  double _rValue = 50.0; // measurement noise
-  double _xEstimate = 0.0; // estimated value
-  double _pEstimate = 1.0; // estimation error covariance
+  StreamSubscription<Position>? _positionStreamSubscription;
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   bool _isMoving = false;
   DateTime? _lastUpdateTime;
   final _updateInterval = Duration(seconds: 5);
+  List<Map<String, double>> _tripLocations = [];
+  bool _isTracking = false;
+  List<Position> _recentPositions = [];
+  final int _positionBufferSize = 5;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _startListeningToLocationUpdates();
-    _startListeningToAccelerometer();
   }
 
   @override
   void dispose() {
-    _positionStreamSubscription.cancel();
-    _accelerometerSubscription.cancel();
+    _positionStreamSubscription?.cancel();
+    _accelerometerSubscription?.cancel();
     _mapController?.dispose();
     super.dispose();
   }
@@ -82,10 +78,48 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     }
   }
 
+  void _startTracking() {
+    if (_isTracking) return;
+
+    setState(() {
+      _isTracking = true;
+      _markers.clear();
+      _polylineCoordinates.clear();
+      _tripLocations.clear();
+      _lastRecordedPosition = null;
+      _recentPositions.clear();
+    });
+
+    _startListeningToLocationUpdates();
+    _startListeningToAccelerometer();
+    _setDebugInfo('Tracking started');
+  }
+
+  void _stopTracking({bool isCancelled = false}) {
+    if (!_isTracking) return;
+
+    setState(() {
+      _isTracking = false;
+    });
+    _positionStreamSubscription?.cancel();
+    _accelerometerSubscription?.cancel();
+
+    if (isCancelled) {
+      _setDebugInfo('Tracking canceled');
+    } else {
+      _setDebugInfo('Tracking finished. Locations logged to console.');
+      print('Trip Locations:');
+      for (var location in _tripLocations) {
+        print(
+            'Latitude: ${location['latitude']}, Longitude: ${location['longitude']}');
+      }
+    }
+  }
+
   void _startListeningToLocationUpdates() {
     const locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 5,
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 1,
     );
 
     _positionStreamSubscription =
@@ -100,75 +134,84 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
         accelerometerEvents.listen((AccelerometerEvent event) {
       final double acceleration =
           sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-      _isMoving = acceleration > 10.5; // Adjust this threshold as needed
+      _isMoving = acceleration > 1.2; // Slightly increased threshold
     });
   }
 
   void _processNewPosition(Position newPosition) {
+    if (!_isTracking) return;
+
     if (_lastUpdateTime != null &&
         DateTime.now().difference(_lastUpdateTime!) < _updateInterval) {
       return;
     }
 
-    if (newPosition.accuracy > 20 || !_isMoving) {
-      _setDebugInfo('Low accuracy or not moving, ignoring update.');
-      return;
+    _recentPositions.add(newPosition);
+    if (_recentPositions.length > _positionBufferSize) {
+      _recentPositions.removeAt(0);
     }
 
-    double filteredLatitude = _applyKalmanFilter(newPosition.latitude);
-    double filteredLongitude = _applyKalmanFilter(newPosition.longitude);
-
-    Position filteredPosition = Position(
-      latitude: filteredLatitude,
-      longitude: filteredLongitude,
-      timestamp: newPosition.timestamp,
-      accuracy: newPosition.accuracy,
-      altitude: newPosition.altitude,
-      heading: newPosition.heading,
-      speed: newPosition.speed,
-      speedAccuracy: newPosition.speedAccuracy,
-      floor: newPosition.floor,
-      isMocked: newPosition.isMocked,
-      // New required parameters
-      altitudeAccuracy: newPosition.altitudeAccuracy,
-      headingAccuracy: newPosition.headingAccuracy,
-    );
+    Position averagePosition = _calculateAveragePosition(_recentPositions);
 
     if (_lastRecordedPosition != null) {
-      double distance = _calculateDistance(
-        gmaps.LatLng(
-            _lastRecordedPosition!.latitude, _lastRecordedPosition!.longitude),
-        gmaps.LatLng(filteredPosition.latitude, filteredPosition.longitude),
+      double distance = Geolocator.distanceBetween(
+        _lastRecordedPosition!.latitude,
+        _lastRecordedPosition!.longitude,
+        averagePosition.latitude,
+        averagePosition.longitude,
       );
 
       _setDebugInfo(
-          'Distance: ${distance.toStringAsFixed(2)}m, Accuracy: ${newPosition.accuracy.toStringAsFixed(2)}m, Moving: $_isMoving');
+          'Distance: ${distance.toStringAsFixed(2)}m, Accuracy: ${averagePosition.accuracy.toStringAsFixed(2)}m, Moving: $_isMoving');
 
-      if (distance >= _distanceThreshold) {
-        _updatePosition(filteredPosition);
-        _lastRecordedPosition = filteredPosition;
-        _setDebugInfo('New position marked');
+      if (distance >= _distanceThreshold && _isMoving) {
+        _updatePosition(averagePosition);
+        _lastRecordedPosition = averagePosition;
+        _setDebugInfo(
+            'New position marked - Distance: ${distance.toStringAsFixed(2)}m');
+        _addTripLocation(averagePosition);
+        _addMarker(
+            gmaps.LatLng(averagePosition.latitude, averagePosition.longitude));
       }
     } else {
-      _updatePosition(filteredPosition);
-      _lastRecordedPosition = filteredPosition;
+      _updatePosition(averagePosition);
+      _lastRecordedPosition = averagePosition;
       _setDebugInfo('First position marked');
+      _addTripLocation(averagePosition);
+      _addMarker(
+          gmaps.LatLng(averagePosition.latitude, averagePosition.longitude));
     }
 
     _lastUpdateTime = DateTime.now();
   }
 
-  double _applyKalmanFilter(double measurement) {
-    // Prediction
-    double xPredicted = _xEstimate;
-    double pPredicted = _pEstimate + _qValue;
+  Position _calculateAveragePosition(List<Position> positions) {
+    if (positions.isEmpty) {
+      throw Exception('No positions to average');
+    }
 
-    // Update
-    double k = pPredicted / (pPredicted + _rValue);
-    _xEstimate = xPredicted + k * (measurement - xPredicted);
-    _pEstimate = (1 - k) * pPredicted;
+    double sumLat = 0, sumLon = 0, sumAlt = 0, sumAcc = 0;
+    for (var position in positions) {
+      sumLat += position.latitude;
+      sumLon += position.longitude;
+      sumAlt += position.altitude;
+      sumAcc += position.accuracy;
+    }
 
-    return _xEstimate;
+    return Position(
+      latitude: sumLat / positions.length,
+      longitude: sumLon / positions.length,
+      timestamp: positions.last.timestamp,
+      accuracy: sumAcc / positions.length,
+      altitude: sumAlt / positions.length,
+      heading: positions.last.heading,
+      speed: positions.last.speed,
+      speedAccuracy: positions.last.speedAccuracy,
+      floor: positions.last.floor,
+      isMocked: positions.last.isMocked,
+      altitudeAccuracy: positions.last.altitudeAccuracy,
+      headingAccuracy: positions.last.headingAccuracy,
+    );
   }
 
   void _updatePosition(Position position) {
@@ -178,7 +221,6 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
           gmaps.LatLng(position.latitude, position.longitude);
 
       _polylineCoordinates.add(newPosition);
-      _addMarker(newPosition);
 
       _mapController?.animateCamera(gmaps.CameraUpdate.newLatLng(newPosition));
 
@@ -187,17 +229,8 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     });
   }
 
-  double _calculateDistance(gmaps.LatLng start, gmaps.LatLng end) {
-    return Geolocator.distanceBetween(
-      start.latitude,
-      start.longitude,
-      end.latitude,
-      end.longitude,
-    );
-  }
-
   void _addMarker(gmaps.LatLng position) {
-    final markerId = gmaps.MarkerId(position.toString());
+    final markerId = gmaps.MarkerId(DateTime.now().toIso8601String());
     final marker = gmaps.Marker(
       markerId: markerId,
       position: position,
@@ -215,6 +248,13 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       _debugInfo = info;
     });
     print(info);
+  }
+
+  void _addTripLocation(Position position) {
+    _tripLocations.add({
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+    });
   }
 
   @override
@@ -258,6 +298,24 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
               _debugInfo,
               style: TextStyle(color: Colors.white),
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: _isTracking ? null : _startTracking,
+                child: Text('Start Trip'),
+              ),
+              ElevatedButton(
+                onPressed:
+                    _isTracking ? () => _stopTracking(isCancelled: true) : null,
+                child: Text('Cancel Trip'),
+              ),
+              ElevatedButton(
+                onPressed: _isTracking ? () => _stopTracking() : null,
+                child: Text('Finish Trip'),
+              ),
+            ],
           ),
         ],
       ),

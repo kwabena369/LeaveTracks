@@ -26,6 +26,20 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Leave Tracks Backend' });
 });
 
+app.get("/SavedRoutes", (req, res) => {
+  //   tryp
+  console.log("there is the kit")
+  res.json({
+    message: "There is something Big ",
+    TripValues: [
+      {
+        nameTrip: "Aunti Ama place to whatever",
+        profileTrip : "/whatever.png"
+        
+      }
+    ]
+  })
+})
 //  handling of the user inforamtion for the 
 app.post("/Content", (req, res) => {
   console.log(req.body);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:leave_tracks/Screens/DumyTest/InputTest.dart';
-import 'package:leave_tracks/Screens/RealTimeTrackingMap.dart';
+import 'package:leave_tracks/Screens/Trips/RealTimeTrackingMap.dart';
 import 'package:leave_tracks/Screens/First_Page.dart';
 
 void main() {
