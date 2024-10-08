@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:leave_tracks/Service/TripService/Trips.dart';
 import 'package:leave_tracks/Widgets/SingleSavedRoute.dart';
 
+import 'RealTimeTrackingMap.dart';
+
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
 
@@ -17,7 +19,44 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   void _startNewTrip() {
-    // TODO: Implement new trip functionality
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String newTripName = '';
+        return AlertDialog(
+          title: Text('Create New Trip'),
+          content: TextField(
+            onChanged: (value) {
+              newTripName = value;
+            },
+            decoration: InputDecoration(hintText: "Enter trip name"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Create'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (newTripName.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RealTimeTrackingMap(tripName: newTripName),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -27,8 +66,8 @@ class _LandingPageState extends State<LandingPage> {
         backgroundColor: Colors.orange,
         title: const Text(
           "TexasStudio💀👻",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,
-          fontSize: 20),
+          style: TextStyle(
+              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
           Padding(
@@ -42,7 +81,7 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
               child: const Text("Start New Trip",
-              style: TextStyle(color: Colors.white),),
+                  style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -52,7 +91,7 @@ class _LandingPageState extends State<LandingPage> {
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            childAspectRatio: 1, // Square aspect ratio for the cards
+            childAspectRatio: 1,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
           ),

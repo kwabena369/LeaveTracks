@@ -6,6 +6,12 @@ import 'dart:async';
 import 'dart:math';
 
 class RealTimeTrackingMap extends StatefulWidget {
+
+  final String tripName;
+
+  const RealTimeTrackingMap({Key? key, required this.tripName})
+      : super(key: key);
+
   @override
   _RealTimeTrackingMapState createState() => _RealTimeTrackingMapState();
 }
@@ -261,7 +267,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Intelligent Explorer Tracking'),
+        title: Text('${widget.tripName} - Tracking'),
       ),
       body: Column(
         children: [
