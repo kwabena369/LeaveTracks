@@ -4,9 +4,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RealTimeTrackingMap extends StatefulWidget {
-
   final String tripName;
 
   const RealTimeTrackingMap({Key? key, required this.tripName})
@@ -33,6 +34,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   bool _isTracking = false;
   List<Position> _recentPositions = [];
   final int _positionBufferSize = 5;
+  List<Map<String, double>> _routeCoordinates = [];
 
   @override
   void initState() {
@@ -92,6 +94,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       _markers.clear();
       _polylineCoordinates.clear();
       _tripLocations.clear();
+      _routeCoordinates.clear();
       _lastRecordedPosition = null;
       _recentPositions.clear();
     });
@@ -261,6 +264,73 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       'latitude': position.latitude,
       'longitude': position.longitude,
     });
+    _routeCoordinates.add({
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+    });
+  }
+
+  void _endTrip() {
+    _stopTracking();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('End Trip'),
+          content: Text('Do you want to save or discard this trip?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Discard'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _discardTrip();
+              },
+            ),
+            TextButton(
+              child: Text('Save'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _saveTrip();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _discardTrip() {
+    setState(() {
+      _routeCoordinates.clear();
+      _tripLocations.clear();
+      _markers.clear();
+      _polylineCoordinates.clear();
+    });
+    _setDebugInfo('Trip discarded');
+  }
+
+  Future<void> _saveTrip() async {
+    _setDebugInfo('Saving trip...');
+
+    final url = Uri.parse('https://leave-tracks-backend.vercel.app/Routes');
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'Name_Route': widget.tripName,
+        'Path_Cordinate': _routeCoordinates,
+        'userProfile': '/cat.png', // Default value, update as needed
+        'userName': 'kogi', // Default value, update as needed
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      _setDebugInfo('Trip saved successfully');
+    } else {
+      _setDebugInfo('Failed to save trip: ${response.statusCode}');
+    }
   }
 
   @override
@@ -318,8 +388,11 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
                 child: Text('Cancel Trip'),
               ),
               ElevatedButton(
-                onPressed: _isTracking ? () => _stopTracking() : null,
-                child: Text('Finish Trip'),
+                onPressed: _isTracking ? _endTrip : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+                child: Text('End Trip'),
               ),
             ],
           ),

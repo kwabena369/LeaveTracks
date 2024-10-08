@@ -1,32 +1,32 @@
-// models/Coordinates.js
-let mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-const CoordinateSchema = require("./Cordinates")
 const RouteSchema = new mongoose.Schema({
   userProfile: {
     type: String,
     required: false,
-    default :"/cat.png"
+    default: "/cat.png"
   },
   userName: {
     type: String,
-    required: false ,
-    default : "kogi"
-  }
-  ,
+    required: false,
+    default: "kogi"
+  },
   Name_Route: {
     type: String,
     required: true
   },
-  Path_Cordinate: [],
-  createAt: {
+  Path_Cordinate: [{
+    latitude: Number,
+    longitude: Number
+  }],
+  createdAt: {
     type: Date,
     default: Date.now
   },
-  updateAt: {
+  updatedAt: {
     type: Date,
     default: Date.now
   }
 });
 
-module.exports = mongoose.model("Route", RouteSchema);
+module.exports = mongoose.model("TripRoute", RouteSchema);
