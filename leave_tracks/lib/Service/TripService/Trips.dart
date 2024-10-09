@@ -5,9 +5,6 @@ import 'package:http/http.dart' as http;
 const String baseUrl = 'https://leave-tracks-backend.vercel.app';
 
 Future<void> AllRoutes() async {
-//  for the routes
-  final value_now = await http.get(Uri.parse('$baseUrl/SavedRoutes'));
-  //  then base on that we console.log them out
-  print(value_now.body);
-  
+  final valueNow = await http.get(Uri.parse('$baseUrl/SavedRoutes'));
+     // 
 }

@@ -75,7 +75,7 @@ app.post("/Routes", async (req, res) => {
   }
 });
 
-app.get("/Routes", async (req, res) => {
+app.get("/allRoutes", async (req, res) => {
   try {
     const routes = await TripRoute.find().sort({ createdAt: -1 });
     res.status(200).json(routes);
