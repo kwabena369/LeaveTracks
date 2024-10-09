@@ -77,7 +77,7 @@ app.post("/Routes", async (req, res) => {
 
 app.get("/allRoutes", async (req, res) => {
   try {
-    const routes = await TripRoute.find().sort({ createdAt: -1 });
+    const routes = await TripRoute.find()
     res.status(200).json(routes);
   } catch (error) {
     console.error("Error fetching routes:", error);

@@ -22,7 +22,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    AllRoutes();
+    fetchAllRoutes();
   }
 
   //  this is the function for fetching the fetching all the route ...
@@ -36,7 +36,7 @@ class _LandingPageState extends State<LandingPage> {
     });
 
     try {
-      final responce = await http.get(Uri.parse('$baseUrl/allRoutes'));
+      final responce = await http.get(Uri.parse('https://leave-tracks-backend.vercel.app/allRoutes'));
 
       if (responce.statusCode == 200) {
         //  setting the vlaues into the Routeplace
@@ -48,7 +48,6 @@ class _LandingPageState extends State<LandingPage> {
       } else {
         print("there is somebig error in the backend");
         setState(() {
-          _isLoading = false;
           _routePlaces = [];
         });
       }
