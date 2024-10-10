@@ -85,7 +85,7 @@ app.get("/allRoutes", async (req, res) => {
   }
 });
 
-app.get("/Routes/:id", async (req, res) => {
+app.get("/Trip/:id", async (req, res) => {
   try {
     const route = await TripRoute.findById(req.params.id);
     if (!route) {

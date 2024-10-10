@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:leave_tracks/Screens/Trips/TripReview.dart';
 import 'package:leave_tracks/Service/TripService/Trips.dart';
 import 'package:leave_tracks/Widgets/SingleSavedRoute.dart';
 import 'package:http/http.dart' as http;
@@ -173,15 +174,30 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                         itemCount: _routePlaces
                             .length, // Replace with actual item count
-                        itemBuilder: (context, index) {
+                   itemBuilder: (context, index) {
                           final singleRoute = _routePlaces[index];
-                          return SingleSavedRoute(
-                            id: singleRoute['id']?.toString() ?? '',
-                            previewFile: 'assets/Fun/Trip.png',
-                            userProfile: "assets/Fun/One.png",
-                            userName: "Serwaa",
-                            nameTrip:
-                                singleRoute['Name_Route']?.toString() ?? '',
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigate to the new screen here
+                             Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Tripreview(
+                                      tripId:  singleRoute['_id']
+                                          ),
+
+                                          
+                                ),
+                              );
+                            },
+                            child: SingleSavedRoute(
+                              id: singleRoute['id']?.toString() ?? '',
+                              previewFile: 'assets/Fun/Trip.png',
+                              userProfile: "assets/Fun/One.png",
+                              userName: "Serwaa",
+                              nameTrip:
+                                  singleRoute['Name_Route']?.toString() ?? '',
+                            ),
                           );
                         },
                       ),
