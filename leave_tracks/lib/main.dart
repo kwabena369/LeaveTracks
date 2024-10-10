@@ -3,6 +3,8 @@ import 'package:leave_tracks/Screens/DumyTest/InputTest.dart';
 import 'package:leave_tracks/Screens/Trips/LandingPage.dart';
 import 'package:leave_tracks/Screens/Trips/RealTimeTrackingMap.dart';
 import 'package:leave_tracks/Screens/First_Page.dart';
+import 'package:leave_tracks/Screens/VideoChat/TestRoom/AIAssistedMap.dart';
+import 'package:leave_tracks/Screens/VideoChat/TestRoom/test.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +25,8 @@ class MyApp extends StatelessWidget {
         "/MyRoute":(context)=>LandingPage(),
         "/Settings": (context) => LandingPage(),
         "/LogOut": (context) => LandingPage(),
+        "/TestVideo": (context) => TestRoom(),
+        "/AIshine" : (context)=> AIAssistedMap()
 
       },
     );

@@ -274,7 +274,33 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pushNamed(context, "/LogOut");
               },
             )
-
+,
+            ListTile(
+              leading: const Icon(
+                Icons.route,
+              ),
+              title: const Text(
+                "Gemini",
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/AIshine");
+              },
+            ),
+             ListTile(
+              leading: const Icon(
+                Icons.route,
+              ),
+              title: const Text(
+                "TestVideo",
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/TestVideo");
+              },
+            )
 
 
           ],

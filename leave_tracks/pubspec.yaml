@@ -41,6 +41,8 @@ dependencies:
   flutter_map: ^5.0.0
   google_maps_flutter: ^2.2.5
   sensors_plus: ^6.0.1
+  flutter_webrtc: ^0.9.11
+
 
 
 
