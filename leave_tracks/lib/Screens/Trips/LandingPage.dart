@@ -36,7 +36,8 @@ class _LandingPageState extends State<LandingPage> {
     });
 
     try {
-      final responce = await http.get(Uri.parse('https://leave-tracks-backend.vercel.app/allRoutes'));
+      final responce = await http
+          .get(Uri.parse('https://leave-tracks-backend.vercel.app/allRoutes'));
 
       if (responce.statusCode == 200) {
         //  setting the vlaues into the Routeplace
@@ -129,6 +130,7 @@ class _LandingPageState extends State<LandingPage> {
           ),
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child:
@@ -173,15 +175,94 @@ class _LandingPageState extends State<LandingPage> {
                             .length, // Replace with actual item count
                         itemBuilder: (context, index) {
                           final singleRoute = _routePlaces[index];
-                          return  SingleSavedRoute(
+                          return SingleSavedRoute(
                             id: singleRoute['id']?.toString() ?? '',
                             previewFile: 'assets/Fun/Trip.png',
                             userProfile: "assets/Fun/One.png",
-                            userName: "Serwaa" ,
-                            nameTrip: singleRoute['Name_Route']?.toString()??'',
+                            userName: "Serwaa",
+                            nameTrip:
+                                singleRoute['Name_Route']?.toString() ?? '',
                           );
                         },
                       ),
+      ),
+//  for the purpose of nav
+// igation
+      drawer: Drawer(
+        
+        child: ListView(
+          padding: const EdgeInsets.all(2),
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                  color: Colors.black, borderRadius: BorderRadius.circular(20)),
+              child: const Text(
+                "Trackime 👻💀",
+                style: TextStyle(color: Colors.white, fontSize: 30),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.home,
+              ),
+              title: const Text(
+                "H o m e",
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/Home");
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(
+                Icons.route,
+              ),
+              title: const Text(
+                "My R o u t e",
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/MyRoute");
+              },
+            )
+
+            ,
+
+ ListTile(
+              leading: const Icon(
+                Icons.settings,
+              ),
+              title: const Text(
+                "S e t t i n g s",
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/Settings");
+              },
+            )
+            ,
+             ListTile(
+              leading: const Icon(
+                Icons.logout,
+              ),
+              title: const Text(
+                "Log Out",
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/LogOut");
+              },
+            )
+
+
+
+          ],
+        ),
       ),
     );
   }

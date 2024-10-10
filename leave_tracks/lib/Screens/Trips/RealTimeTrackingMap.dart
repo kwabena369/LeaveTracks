@@ -29,7 +29,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   bool _isMoving = false;
   DateTime? _lastUpdateTime;
-  final _updateInterval = Duration(seconds: 5);
+  final _updateInterval = Duration(seconds: 3);
   List<Map<String, double>> _tripLocations = [];
   bool _isTracking = false;
   List<Position> _recentPositions = [];
@@ -177,7 +177,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
         _updatePosition(averagePosition);
         _lastRecordedPosition = averagePosition;
         _setDebugInfo(
-            'New position marked - Distance: ${distance.toStringAsFixed(2)}m');
+            'Bro your new position marked - Distance: ${distance.toStringAsFixed(2)}m');
         _addTripLocation(averagePosition);
         _addMarker(
             gmaps.LatLng(averagePosition.latitude, averagePosition.longitude));
@@ -185,7 +185,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     } else {
       _updatePosition(averagePosition);
       _lastRecordedPosition = averagePosition;
-      _setDebugInfo('First position marked');
+      _setDebugInfo('yo your  position marked');
       _addTripLocation(averagePosition);
       _addMarker(
           gmaps.LatLng(averagePosition.latitude, averagePosition.longitude));
@@ -380,7 +380,11 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
             children: [
               ElevatedButton(
                 onPressed: _isTracking ? null : _startTracking,
-                child: Text('Start Trip'),
+                child: const Text('Start Trip',
+                style: TextStyle(color: Colors.blueAccent,
+                fontWeight: FontWeight.normal,
+                ),),
+                
               ),
               ElevatedButton(
                 onPressed:

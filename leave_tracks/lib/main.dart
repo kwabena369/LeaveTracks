@@ -18,6 +18,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Saint",
       home: LandingPage(),
+      routes: {
+        "/Home": (context) => LandingPage(),
+        "/MyRoute":(context)=>LandingPage(),
+        "/Settings": (context) => LandingPage(),
+        "/LogOut": (context) => LandingPage(),
+
+      },
     );
   }
 
