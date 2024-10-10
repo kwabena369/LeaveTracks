@@ -71,10 +71,10 @@ class _TripreviewState extends State<Tripreview>
       var endPoint = coordinates.last;
 
       markers.add(Marker(
-        markerId: MarkerId('start'),
+        markerId: const MarkerId('start'),
         position: LatLng(startPoint['latitude'], startPoint['longitude']),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: InfoWindow(title: 'Start'),
+        infoWindow: const InfoWindow(title: 'Start'),
       ));
 
       markers.add(Marker(
