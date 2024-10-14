@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -8,7 +7,7 @@ class HttpHelper {
   static const String baseUrl = 'https://leave-tracks-backend.vercel.app';
 
   Future<void> testBackend(String message) async {
-    final String url = '$baseUrl/test';
+    const String url = '$baseUrl/test';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -27,7 +26,7 @@ class HttpHelper {
   }
 
   Future<void> sendLocation(double latitude, double longitude) async {
-    final String url = '$baseUrl/location';
+    const String url = '$baseUrl/location';
     try {
       final response = await http.post(
         Uri.parse(url),

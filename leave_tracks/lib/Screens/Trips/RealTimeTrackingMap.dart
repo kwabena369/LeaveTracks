@@ -10,31 +10,35 @@ import 'dart:convert';
 class RealTimeTrackingMap extends StatefulWidget {
   final String tripName;
 
-  const RealTimeTrackingMap({Key? key, required this.tripName})
-      : super(key: key);
+  const RealTimeTrackingMap({super.key, required this.tripName});
 
   @override
   _RealTimeTrackingMapState createState() => _RealTimeTrackingMapState();
 }
 
 class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
-  gmaps.GoogleMapController? _mapController;
-  Position? _currentPosition;
-  Set<gmaps.Marker> _markers = {};
-  List<gmaps.LatLng> _polylineCoordinates = [];
-  String _debugInfo = '';
-  final double _distanceThreshold = 9.144; // 30 feet in meters
-  Position? _lastRecordedPosition;
+//  the boss that manages the way the zooming of the map is here  and there 
+gmaps.GoogleMapController? _mapController;
+Position? _currentPosition;
+//  the keeper of the user maps there ..
+final Set<gmaps.Marker> _markers = {};
+//  this is the long list that store the lat and Lat pair in it .. 
+final List<gmaps.LatLng> _polylineCoordinates = [];
+ 
+  String _debugInfo = ''; // for keeping the error information .
+  final double _distanceThreshold = 9.144; // tihis is in meter for feet (30feet)
+
+  Position? _lastRecordedPosition; // this is the last possition ...
   StreamSubscription<Position>? _positionStreamSubscription;
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   bool _isMoving = false;
   DateTime? _lastUpdateTime;
-  final _updateInterval = Duration(seconds: 3);
-  List<Map<String, double>> _tripLocations = [];
+  final _updateInterval = const Duration(seconds: 3);
+  final List<Map<String, double>> _tripLocations = [];
   bool _isTracking = false;
-  List<Position> _recentPositions = [];
+  final List<Position> _recentPositions = [];
   final int _positionBufferSize = 5;
-  List<Map<String, double>> _routeCoordinates = [];
+  final List<Map<String, double>> _routeCoordinates = [];
 
   @override
   void initState() {
@@ -86,7 +90,12 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     }
   }
 
-  void _startTracking() {
+//  this is a function to Capture the image ..
+Future <void> captureAndStore()async{
+   
+}
+
+void _startTracking() {
     if (_isTracking) return;
 
     setState(() {
@@ -276,18 +285,18 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('End Trip'),
-          content: Text('Do you want to save or discard this trip?'),
+          title: const Text('End Trip'),
+          content: const Text('Do you want to save or discard this trip?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Discard'),
+              child: const Text('Discard'),
               onPressed: () {
                 Navigator.of(context).pop();
                 _discardTrip();
               },
             ),
             TextButton(
-              child: Text('Save'),
+              child: const Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop();
                 _saveTrip();
@@ -343,7 +352,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
         children: [
           Expanded(
             child: _currentPosition == null
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : gmaps.GoogleMap(
                     initialCameraPosition: gmaps.CameraPosition(
                       target: gmaps.LatLng(_currentPosition!.latitude,
@@ -356,7 +365,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
                     markers: _markers,
                     polylines: {
                       gmaps.Polyline(
-                        polylineId: gmaps.PolylineId('track'),
+                        polylineId: const gmaps.PolylineId('track'),
                         color: Colors.blue,
                         points: _polylineCoordinates,
                         width: 5,
@@ -367,12 +376,12 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
                   ),
           ),
           Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             color: Colors.black87,
             width: double.infinity,
             child: Text(
               _debugInfo,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           Row(
@@ -389,14 +398,14 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
               ElevatedButton(
                 onPressed:
                     _isTracking ? () => _stopTracking(isCancelled: true) : null,
-                child: Text('Cancel Trip'),
+                child: const Text('Cancel Trip'),
               ),
               ElevatedButton(
                 onPressed: _isTracking ? _endTrip : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                 ),
-                child: Text('End Trip'),
+                child: const Text('End Trip'),
               ),
             ],
           ),

@@ -8,7 +8,7 @@ import 'dart:async';
 class Tripreview extends StatefulWidget {
   final String tripId;
 
-  const Tripreview({Key? key, required this.tripId}) : super(key: key);
+  const Tripreview({super.key, required this.tripId});
 
   @override
   State<Tripreview> createState() => _TripreviewState();
@@ -31,7 +31,7 @@ class _TripreviewState extends State<Tripreview>
     fetchTripInfo();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
     _getCurrentLocation();
   }
@@ -78,10 +78,10 @@ class _TripreviewState extends State<Tripreview>
       ));
 
       markers.add(Marker(
-        markerId: MarkerId('end'),
+        markerId: const MarkerId('end'),
         position: LatLng(endPoint['latitude'], endPoint['longitude']),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: 'End'),
+        infoWindow: const InfoWindow(title: 'End'),
       ));
 
       setState(() {});
@@ -96,7 +96,6 @@ class _TripreviewState extends State<Tripreview>
     if (!serviceEnabled) {
       return;
     }
-
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -114,7 +113,7 @@ class _TripreviewState extends State<Tripreview>
       setState(() {
         circles.clear();
         circles.add(Circle(
-          circleId: CircleId('currentLocation'),
+          circleId: const CircleId('currentLocation'),
           center: LatLng(position.latitude, position.longitude),
           radius: 10,
           fillColor: Colors.blue.withOpacity(0.5),
@@ -135,7 +134,7 @@ class _TripreviewState extends State<Tripreview>
 
     return {
       Polyline(
-        polylineId: PolylineId('trip_route'),
+        polylineId: const PolylineId('trip_route'),
         color: Colors.blue,
         points: polylineCoordinates,
         width: 5,
@@ -147,15 +146,15 @@ class _TripreviewState extends State<Tripreview>
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text('Trip Details')),
-        body: Center(child: CircularProgressIndicator()),
+        appBar: AppBar(title: const Text('Trip Details')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (tripData == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Trip Details')),
-        body: Center(child: Text('Failed to load trip data')),
+        appBar: AppBar(title: const Text('Trip Details')),
+        body: const Center(child: Text('Failed to load trip data')),
       );
     }
 

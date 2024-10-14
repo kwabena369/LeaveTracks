@@ -2,13 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:leave_tracks/Screens/Trips/TripReview.dart';
-import 'package:leave_tracks/Service/TripService/Trips.dart';
 import 'package:leave_tracks/Widgets/SingleSavedRoute.dart';
 import 'package:http/http.dart' as http;
 import 'RealTimeTrackingMap.dart';
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key}) : super(key: key);
+  const LandingPage({super.key});
 
   @override
   State<LandingPage> createState() => _LandingPageState();
@@ -69,22 +68,22 @@ class _LandingPageState extends State<LandingPage> {
       builder: (BuildContext context) {
         String newTripName = '';
         return AlertDialog(
-          title: Text('Create New Trip'),
+          title: const Text('Create New Trip'),
           content: TextField(
             onChanged: (value) {
               newTripName = value;
             },
-            decoration: InputDecoration(hintText: "Enter trip name"),
+            decoration: const InputDecoration(hintText: "Enter trip name"),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Create'),
+              child: const Text('Create'),
               onPressed: () {
                 Navigator.of(context).pop();
                 if (newTripName.isNotEmpty) {
@@ -145,7 +144,7 @@ class _LandingPageState extends State<LandingPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               "💀",
                               style: TextStyle(
                                 fontSize: 50,

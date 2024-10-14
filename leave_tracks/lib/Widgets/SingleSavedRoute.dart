@@ -8,13 +8,13 @@ class SingleSavedRoute extends StatelessWidget {
   final String nameTrip;
 
   const SingleSavedRoute({
-    Key? key,
+    super.key,
     required this.id,
     required this.previewFile,
     required this.userProfile,
     required this.userName,
     required this.nameTrip,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

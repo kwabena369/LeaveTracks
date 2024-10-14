@@ -1,13 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'package:leave_tracks/Service/http_helper.dart';
 
 class LocationDisplayWidget extends StatefulWidget {
-  const LocationDisplayWidget({Key? key}) : super(key: key);
+  const LocationDisplayWidget({super.key});
 
   @override
   _LocationDisplayWidgetState createState() => _LocationDisplayWidgetState();
@@ -101,7 +99,7 @@ class _LocationDisplayWidgetState extends State<LocationDisplayWidget> {
             const SizedBox(height: 16),
             Text(
               'Debug: $debugMessage',
-              style: TextStyle(fontSize: 14, color: Colors.red),
+              style: const TextStyle(fontSize: 14, color: Colors.red),
             ),
           ],
         ),

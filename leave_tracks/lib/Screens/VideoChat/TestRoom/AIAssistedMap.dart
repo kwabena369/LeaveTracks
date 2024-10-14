@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class AIAssistedMap extends StatefulWidget {
-  const AIAssistedMap({Key? key}) : super(key: key);
+  const AIAssistedMap({super.key});
 
   @override
   State<AIAssistedMap> createState() => _AIAssistedMapState();
@@ -14,7 +14,7 @@ class AIAssistedMap extends StatefulWidget {
 class _AIAssistedMapState extends State<AIAssistedMap> {
   GoogleMapController? _mapController;
   Position? _currentPosition;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
   String _aiSuggestion = '';
 
   @override
@@ -72,17 +72,17 @@ class _AIAssistedMapState extends State<AIAssistedMap> {
     if (_currentPosition != null) {
       _markers.clear();
       _markers.add(Marker(
-        markerId: MarkerId('currentLocation'),
+        markerId: const MarkerId('currentLocation'),
         position:
             LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-        infoWindow: InfoWindow(title: 'You are here'),
+        infoWindow: const InfoWindow(title: 'You are here'),
       ));
     }
   }
 
   Future<void> _getAISuggestion(double lat, double lng) async {
-    final apiKey = 'AIzaSyD-zMkmVWcQrmPBTXXq2tLxO9_8qTPays0';
-    final url =
+    const apiKey = 'AIzaSyD-zMkmVWcQrmPBTXXq2tLxO9_8qTPays0';
+    const url =
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey';
 
     final response = await http.post(
@@ -117,14 +117,14 @@ class _AIAssistedMapState extends State<AIAssistedMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('AI-Assisted Map')),
+      appBar: AppBar(title: const Text('AI-Assisted Map')),
       body: Stack(
         children: [
           GoogleMap(
             onMapCreated: (controller) {
               _mapController = controller;
             },
-            initialCameraPosition: CameraPosition(
+            initialCameraPosition: const CameraPosition(
               target: LatLng(0, 0),
               zoom: 2,
             ),
@@ -142,9 +142,9 @@ class _AIAssistedMapState extends State<AIAssistedMap> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('AI Suggestion:',
+                    const Text('AI Suggestion:',
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(_aiSuggestion),
                   ],
                 ),

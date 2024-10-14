@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:leave_tracks/Service/http_helper.dart';
 
 class InputTest extends StatefulWidget {
-  const InputTest({Key? key}) : super(key: key);
+  const InputTest({super.key});
 
   @override
   State<InputTest> createState() => _InputTestState();
@@ -32,7 +32,7 @@ class _InputTestState extends State<InputTest> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("ghost"),
+          title: const Text("ghost"),
           centerTitle: true,
         ),
         body: Center(
@@ -76,11 +76,11 @@ class SingleInput extends StatelessWidget {
   final void Function(String) onChanged;
 
   const SingleInput({
-    Key? key,
+    super.key,
     required this.hintText,
     required this.labelText,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'dart:async';
-import 'dart:math';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class TestRoom extends StatefulWidget {
-  const TestRoom({Key? key}) : super(key: key);
+  const TestRoom({super.key});
 
   @override
   State<TestRoom> createState() => _TestRoomState();
@@ -18,7 +14,12 @@ class TestRoom extends StatefulWidget {
 class _TestRoomState extends State<TestRoom> {
   GoogleMapController? _mapController;
   Position? _currentPosition;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
+  //  this one i do not have any idea of what it is .. 
+  //  ... the googleMapController 
+  //  ... the position thing ... 
+  //  the makers wich is a set tha i gave nnever see it before
+  //  the maker Set<Marker> _name = {}
   StreamSubscription<Position>? _positionStreamSubscription;
 
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
@@ -98,10 +99,10 @@ class _TestRoomState extends State<TestRoom> {
     if (_currentPosition != null) {
       _markers.clear();
       _markers.add(Marker(
-        markerId: MarkerId('currentLocation'),
+        markerId: const MarkerId('currentLocation'),
         position:
             LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-        infoWindow: InfoWindow(title: 'Current Location'),
+        infoWindow: const InfoWindow(title: 'Current Location'),
       ));
     }
   }
@@ -109,14 +110,14 @@ class _TestRoomState extends State<TestRoom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Test Room')),
+      appBar: AppBar(title: const Text('Test Room')),
       body: Stack(
         children: [
           GoogleMap(
             onMapCreated: (controller) {
               _mapController = controller;
             },
-            initialCameraPosition: CameraPosition(
+            initialCameraPosition: const CameraPosition(
               target: LatLng(0, 0),
               zoom: 2,
             ),
