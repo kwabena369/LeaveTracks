@@ -43,6 +43,7 @@ dependencies:
   sensors_plus: ^6.0.1
   flutter_webrtc: ^0.9.11
   camera: ^0.10.0
+  image_picker: ^1.1.2
 
 
 

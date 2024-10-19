@@ -4,6 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 
 class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});
+
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
@@ -32,6 +34,7 @@ class _CameraScreenState extends State<CameraScreen> {
       final image = await _controller.takePicture();
       final bytes = await image.readAsBytes();
       final base64Image = base64Encode(bytes);
+      print(base64Image);
       await _uploadImage(base64Image);
     } catch (e) {
       print('Error taking picture: $e');
@@ -39,7 +42,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _uploadImage(String base64Image) async {
-    final url = 'https://your-backend-url.com/upload';
+    const url = 'https://leave-tracks-backend.vercel.app/UploadImage';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -64,20 +67,20 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Camera Screen')),
+      appBar: AppBar(title: const Text('Camera Screen')),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return CameraPreview(_controller);
           } else {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _takePictureAndUpload,
-        child: Icon(Icons.camera_alt),
+        child: const Icon(Icons.camera_alt),
       ),
     );
   }

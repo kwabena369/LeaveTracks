@@ -116,16 +116,36 @@ class _LandingPageState extends State<LandingPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: ElevatedButton(
-              onPressed: _startNewTrip,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: _startNewTrip,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text("Start New Trip",
+                      style: TextStyle(color: Colors.white)),
                 ),
-              ),
-              child: const Text("Start New Trip",
-                  style: TextStyle(color: Colors.white)),
+                //  for the direction to camera pages...
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pushReplacementNamed("/CameraCapture");
+                    },
+                    child: const Text("test",
+                        style: TextStyle(color: Colors.green, fontSize: 15)))
+                //  this is for the routing to the other side
+                ,
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed("/DashBoard");
+                    },
+                    child: const Text("DashBoard"))
+                    
+              ],
             ),
           ),
         ],
@@ -173,19 +193,16 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                         itemCount: _routePlaces
                             .length, // Replace with actual item count
-                   itemBuilder: (context, index) {
+                        itemBuilder: (context, index) {
                           final singleRoute = _routePlaces[index];
                           return GestureDetector(
                             onTap: () {
                               // Navigate to the new screen here
-                             Navigator.push(
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => Tripreview(
-                                      tripId:  singleRoute['_id']
-                                          ),
-
-                                          
+                                  builder: (context) =>
+                                      Tripreview(tripId: singleRoute['_id']),
                                 ),
                               );
                             },
@@ -204,7 +221,6 @@ class _LandingPageState extends State<LandingPage> {
 //  for the purpose of nav
 // igation
       drawer: Drawer(
-        
         child: ListView(
           padding: const EdgeInsets.all(2),
           children: <Widget>[
@@ -229,7 +245,6 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pushNamed(context, "/Home");
               },
             ),
-
             ListTile(
               leading: const Icon(
                 Icons.route,
@@ -242,11 +257,8 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, "/MyRoute");
               },
-            )
-
-            ,
-
- ListTile(
+            ),
+            ListTile(
               leading: const Icon(
                 Icons.settings,
               ),
@@ -258,9 +270,8 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, "/Settings");
               },
-            )
-            ,
-             ListTile(
+            ),
+            ListTile(
               leading: const Icon(
                 Icons.logout,
               ),
@@ -272,8 +283,7 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, "/LogOut");
               },
-            )
-,
+            ),
             ListTile(
               leading: const Icon(
                 Icons.route,
@@ -287,7 +297,7 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pushNamed(context, "/AIshine");
               },
             ),
-             ListTile(
+            ListTile(
               leading: const Icon(
                 Icons.route,
               ),
@@ -300,8 +310,6 @@ class _LandingPageState extends State<LandingPage> {
                 Navigator.pushNamed(context, "/TestVideo");
               },
             )
-
-
           ],
         ),
       ),

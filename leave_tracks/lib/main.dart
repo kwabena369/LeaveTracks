@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:leave_tracks/Screens/CameraCapture/CameraScreen.dart';
+import 'package:leave_tracks/Screens/Dashboard/DashBoard.dart';
 import 'package:leave_tracks/Screens/Trips/LandingPage.dart';
 import 'package:leave_tracks/Screens/VideoChat/TestRoom/AIAssistedMap.dart';
 import 'package:leave_tracks/Screens/VideoChat/TestRoom/test.dart';
@@ -23,8 +25,9 @@ class MyApp extends StatelessWidget {
         "/Settings": (context) => const LandingPage(),
         "/LogOut": (context) => const LandingPage(),
         "/TestVideo": (context) => const TestRoom(),
-        "/AIshine" : (context)=> const AIAssistedMap()
-
+        "/AIshine" : (context)=> const AIAssistedMap(),
+        "/CameraCapture":(context)=> const CameraScreen(),
+"/DashBoard":(context)=>const Dashboard()
       },
     );
   }

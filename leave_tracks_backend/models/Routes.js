@@ -26,7 +26,18 @@ const RouteSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  //  this section is a section that is definately not required
+  MemoriesTrip: [
+    {
+      ImageContent: String,
+      Location: {
+        lat: Number,
+        long : Number
+      }
+    }
+    
+  ]
 });
 
 module.exports = mongoose.model("TripRoute", RouteSchema);

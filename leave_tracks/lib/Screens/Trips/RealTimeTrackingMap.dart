@@ -1,3 +1,7 @@
+// ignore_for_file: await_only_futures
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:geolocator/geolocator.dart';
@@ -6,6 +10,14 @@ import 'dart:async';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+
+//  this is for the state
+class UserPicture {
+  final String image; // Base64 string of the image
+  final Map<String, double> location; // Location coordinate
+  UserPicture({required this.image, required this.location});
+}
 
 class RealTimeTrackingMap extends StatefulWidget {
   final String tripName;
@@ -17,16 +29,17 @@ class RealTimeTrackingMap extends StatefulWidget {
 }
 
 class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
-//  the boss that manages the way the zooming of the map is here  and there 
-gmaps.GoogleMapController? _mapController;
-Position? _currentPosition;
+//  the boss that manages the way the zooming of the map is here  and there
+  gmaps.GoogleMapController? _mapController;
+  Position? _currentPosition;
 //  the keeper of the user maps there ..
-final Set<gmaps.Marker> _markers = {};
-//  this is the long list that store the lat and Lat pair in it .. 
-final List<gmaps.LatLng> _polylineCoordinates = [];
- 
+  final Set<gmaps.Marker> _markers = {};
+//  this is the long list that store the lat and Lat pair in it ..
+  final List<gmaps.LatLng> _polylineCoordinates = [];
+
   String _debugInfo = ''; // for keeping the error information .
-  final double _distanceThreshold = 9.144; // tihis is in meter for feet (30feet)
+  final double _distanceThreshold =
+      9.144; // tihis is in meter for feet (30feet)
 
   Position? _lastRecordedPosition; // this is the last possition ...
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -39,6 +52,11 @@ final List<gmaps.LatLng> _polylineCoordinates = [];
   final List<Position> _recentPositions = [];
   final int _positionBufferSize = 5;
   final List<Map<String, double>> _routeCoordinates = [];
+//  this section is for storing of the user
+// picture that they have taken
+  List<UserPicture> userPictures = [];
+
+
 
   @override
   void initState() {
@@ -89,13 +107,40 @@ final List<gmaps.LatLng> _polylineCoordinates = [];
       _setDebugInfo('Error: ${e.toString()}');
     }
   }
+//  for the capturing and the storing of the information
+  Future<void> captureAndStore() async {
+    if (_currentPosition == null) {
+      _setDebugInfo('Cannot capture image: Location not available');
+      return;
+    }
 
-//  this is a function to Capture the image ..
-Future <void> captureAndStore()async{
-   
-}
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
-void _startTracking() {
+    if (image == null) {
+      _setDebugInfo('Image capture cancelled');
+      return;
+    }
+
+    final bytes = await image.readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+    final userPicture = UserPicture(
+      image: base64Image,
+      location: {
+        'latitude': _currentPosition!.latitude,
+        'longitude': _currentPosition!.longitude,
+      },
+    );
+
+    setState(() {
+      userPictures.add(userPicture);
+    });
+
+    _setDebugInfo('Image captured and stored with location');
+  }
+
+  void _startTracking() {
     if (_isTracking) return;
 
     setState(() {
@@ -307,7 +352,6 @@ void _startTracking() {
       },
     );
   }
-
   void _discardTrip() {
     setState(() {
       _routeCoordinates.clear();
@@ -318,27 +362,103 @@ void _startTracking() {
     _setDebugInfo('Trip discarded');
   }
 
-  Future<void> _saveTrip() async {
+Future<void> _saveTrip() async {
     _setDebugInfo('Saving trip...');
 
-    final url = Uri.parse('https://leave-tracks-backend.vercel.app/Routes');
-    final response = await http.post(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
+    try {
+      // First, convert all userPictures to the correct format
+      final memoriesTrip = userPictures
+          .map((up) => {
+                'ImageContent': up.image,
+                'Location': up.location,
+              })
+          .toList();
+
+      // Try the endpoint with lowercase 'routes' instead of 'Routes'
+      final url =
+          Uri.parse('https://leave-tracks-backend.vercel.app/Routes');
+
+      final payload = {
         'Name_Route': widget.tripName,
         'Path_Cordinate': _routeCoordinates,
-        'userProfile': '/cat.png', // Default value, update as needed
-        'userName': 'kogi', // Default value, update as needed
-      }),
-    );
+        'userProfile': '/cat.png',
+        'userName': 'kogi',
+        'MemoriesTrip': memoriesTrip,
+      };
 
-    if (response.statusCode == 200) {
-      _setDebugInfo('Trip saved successfully');
-    } else {
-      _setDebugInfo('Failed to save trip: ${response.statusCode}');
+      // Debug logging before making the request
+      print('Attempting to save trip with following details:');
+      print('URL: $url');
+      print('Headers: ${{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }}');
+      print('Payload structure: ${payload.keys}');
+
+      // Add timeout to the request
+      final response = await http
+          .post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(payload),
+      )
+          .timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Request timed out after 30 seconds');
+        },
+      );
+
+      print('Response received:');
+      print('Status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        _setDebugInfo('Trip saved successfully!');
+        // Clear the current trip data
+        setState(() {
+          _routeCoordinates.clear();
+          _tripLocations.clear();
+          _markers.clear();
+          _polylineCoordinates.clear();
+          userPictures.clear();
+        });
+      } else {
+        throw HttpException(
+            'Server returned ${response.statusCode}: ${response.body}');
+      }
+    } catch (e, stackTrace) {
+       print('Error details: $e');
+      if (e is HttpException) {
+        print('HTTP Exception details: ${e.message}');
+      }
+  
+      print('Error stack trace: $stackTrace');
+      String errorMessage = 'Error saving trip: $e';
+      _setDebugInfo(errorMessage);
+
+      // Show error dialog to user
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error Saving Trip'),
+            content: SingleChildScrollView(
+              child: Text(errorMessage),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -389,11 +509,13 @@ void _startTracking() {
             children: [
               ElevatedButton(
                 onPressed: _isTracking ? null : _startTracking,
-                child: const Text('Start Trip',
-                style: TextStyle(color: Colors.blueAccent,
-                fontWeight: FontWeight.normal,
-                ),),
-                
+                child: const Text(
+                  'Start Trip',
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed:
@@ -406,6 +528,11 @@ void _startTracking() {
                   backgroundColor: Colors.green,
                 ),
                 child: const Text('End Trip'),
+              ),
+              //  this is going to be taking the image and then seting the location of the person
+             ElevatedButton(
+                onPressed: _isTracking ? captureAndStore : null,
+                child: const Text('Capture Moment'),
               ),
             ],
           ),
