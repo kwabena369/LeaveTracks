@@ -60,6 +60,7 @@ class _DashboardState extends State<Dashboard> {
       if (response.statusCode == 200) {
         // Update successful, refresh the routes
         await fetchAllRoutes();
+        
       } else {
         print("Error updating route: ${response.body}");
       }
