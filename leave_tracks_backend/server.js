@@ -147,6 +147,43 @@ app.post("/Routes", async (req, res) => {
     });
   }
 });
+//  here it is specifically for rerouting 
+app.post("/Reroutes",async (req, res) => {
+    try {
+      const { Name_Route, Path_Cordinate, userProfile, userName, MemoriesTrip,RouteId } = req.body;
+  
+        if (!Name_Route || !Path_Cordinate || !userProfile || !userName||!RouteId) {
+        console.log("Missing fields:", { Name_Route, Path_Cordinate, userProfile, userName });
+        return res.status(400).json({ 
+          message: "Missing required fields",
+          received: { Name_Route, Path_Cordinate, userProfile, userName }
+        });
+      }
+  
+    
+    //  the recreation of the  route values
+     const  routerNow = await TripRoute.updateOne({
+      id: RouteId,
+      Path_Cordinate : Path_Cordinate
+     })
+    await routerNow.save()
+        
+      console.log("Route saved successfully");
+      res.status(200).json({ 
+        message: "Route saved successfully", 
+        route: newRoute 
+      });
+    } catch (error) {
+      console.log(error);
+      console.error("Error saving route:", error);
+    res.status(500).json({ 
+      message: "Failed to save route", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+    }
+
+})
 app.use("/auth", Authentication_Router);  // Assuming you want to use this router
 
 // Error handling middleware
@@ -157,17 +194,20 @@ app.use((err, req, res, next) => {
 // here for the updating of the event
 app.put("/updateRoute/:id", async(req,res) => {
   console.log(req.params.id)
+  console.log("from backend")
   
 try {
   let idNow = req.params.id
   let {Name_Route} = req.body;
-  let isthere = await TripRoute.findByIdAndUpdate({
+
+
+  let isthere = await TripRoute.updateOne({
     id: idNow,
     Name_Route : Name_Route
   })
   if (isthere) {
     console.log(isthere);
-    req.json({
+    res.json({
       success: true,
       message :"editing completed"
     })
@@ -179,7 +219,7 @@ try {
 
 // For local development
 if (process.env.NODE_ENV !== 'production') {
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3001;
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

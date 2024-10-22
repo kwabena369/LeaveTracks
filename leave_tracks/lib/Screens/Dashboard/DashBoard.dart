@@ -78,7 +78,7 @@ class _DashboardState extends State<Dashboard> {
           routeName: route['Name_Route'] ?? '',
           onSave: (newName) async {
             Navigator.of(context).pop(); // Close the modal
-            await updateRouteName(route['id'].toString(), newName);
+            await updateRouteName(route['_id'].toString(), newName);
           },
         );
       },
@@ -122,6 +122,15 @@ class _DashboardState extends State<Dashboard> {
                     },
                     onReRoutePressed: () {
                       print("ReRoute pressed for ${singleRoute['Name_Route']}");
+                    Navigator.pushNamed(
+                        context,
+                        '/route',
+                        arguments: {
+                          'tripName': singleRoute['Name_Route'],
+                          'routeId': singleRoute['_id'],
+                        },
+                      );
+
                     },
                   ),
                 );

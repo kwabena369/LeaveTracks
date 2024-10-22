@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:leave_tracks/Screens/CameraCapture/CameraScreen.dart';
 import 'package:leave_tracks/Screens/Dashboard/DashBoard.dart';
 import 'package:leave_tracks/Screens/Trips/LandingPage.dart';
+import 'package:leave_tracks/Screens/VideoChat/ReroutingRoutes/RRoute.dart';
 import 'package:leave_tracks/Screens/VideoChat/TestRoom/AIAssistedMap.dart';
 import 'package:leave_tracks/Screens/VideoChat/TestRoom/test.dart';
 
@@ -27,7 +28,17 @@ class MyApp extends StatelessWidget {
         "/TestVideo": (context) => const TestRoom(),
         "/AIshine" : (context)=> const AIAssistedMap(),
         "/CameraCapture":(context)=> const CameraScreen(),
-"/DashBoard":(context)=>const Dashboard()
+"/DashBoard":(context)=>const Dashboard(),
+        '/route': (context) {
+          // Get the arguments passed through navigation
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return Rroute(
+            tripName: args['tripName'],
+            routeId: args['routeId'],
+          );
+        },
+        
       },
     );
   }
