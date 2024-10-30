@@ -1,6 +1,7 @@
 // ignore_for_file: await_only_futures
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
@@ -36,6 +37,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
   final Set<gmaps.Marker> _markers = {};
 //  this is the long list that store the lat and Lat pair in it ..
   final List<gmaps.LatLng> _polylineCoordinates = [];
+  Uint8List? _imageBytes; // for the cover..
 
   String _debugInfo = ''; // for keeping the error information .
   final double _distanceThreshold =
@@ -55,8 +57,6 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
 //  this section is for storing of the user
 // picture that they have taken
   List<UserPicture> userPictures = [];
-
-
 
   @override
   void initState() {
@@ -107,6 +107,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       _setDebugInfo('Error: ${e.toString()}');
     }
   }
+
 //  for the capturing and the storing of the information
   Future<void> captureAndStore() async {
     if (_currentPosition == null) {
@@ -352,6 +353,7 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
       },
     );
   }
+
   void _discardTrip() {
     setState(() {
       _routeCoordinates.clear();
@@ -362,8 +364,23 @@ class _RealTimeTrackingMapState extends State<RealTimeTrackingMap> {
     _setDebugInfo('Trip discarded');
   }
 
-Future<void> _saveTrip() async {
+//  function that is for handling of the picking of the image
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+      });
+    }
+  }
+
+  Future<void> _saveTrip() async {
     _setDebugInfo('Saving trip...');
+    //  for converting the image to base64
+    String base64Image = base64Encode(_imageBytes!);
 
     try {
       // First, convert all userPictures to the correct format
@@ -375,8 +392,7 @@ Future<void> _saveTrip() async {
           .toList();
 
       // Try the endpoint with lowercase 'routes' instead of 'Routes'
-      final url =
-          Uri.parse('https://leave-tracks-backend.vercel.app/Routes');
+      final url = Uri.parse('https://leave-tracks-backend.vercel.app/Routes');
 
       final payload = {
         'Name_Route': widget.tripName,
@@ -432,11 +448,11 @@ Future<void> _saveTrip() async {
             'Server returned ${response.statusCode}: ${response.body}');
       }
     } catch (e, stackTrace) {
-       print('Error details: $e');
+      print('Error details: $e');
       if (e is HttpException) {
         print('HTTP Exception details: ${e.message}');
       }
-  
+
       print('Error stack trace: $stackTrace');
       String errorMessage = 'Error saving trip: $e';
       _setDebugInfo(errorMessage);
@@ -462,15 +478,59 @@ Future<void> _saveTrip() async {
     }
   }
 
+  Future<void> _storeCover() async {
+    try {
+      final payload = {"Base64_Content_": "base64/pandate"};
+      final responce =
+          await http.post(Uri.parse("https://leave_tracks_backend/Save"),
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: jsonEncode(payload));
+    } catch (e) {
+      debugPrint(e as String?);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.tripName} - Tracking'),
+        actions: [
+          //   the btn for the uploading of the cover for the trip
+            ElevatedButton(
+            onPressed: _pickImage,
+            child: const Text("select Cover",style: TextStyle(
+              color: Colors.blue,
+              fontSize: 23
+            ),),
+          ),
+
+        ],
       ),
       body: Column(
         children: [
-          Expanded(
+          if (_imageBytes != null)
+            Row(
+  children: [
+    ClipRRect(
+      borderRadius: BorderRadius.circular(8.0),
+      child: Image.memory(_imageBytes!, height: 100, width: 80,),
+    ),
+    IconButton(
+      icon: const Icon(Icons.close),
+      onPressed: () {
+        setState(() {
+          _imageBytes = null;
+        });
+      },
+    ),
+  ],
+),
+           
+           Expanded(
             child: _currentPosition == null
                 ? const Center(child: CircularProgressIndicator())
                 : gmaps.GoogleMap(
@@ -530,12 +590,12 @@ Future<void> _saveTrip() async {
                 child: const Text('End Trip'),
               ),
               //  this is going to be taking the image and then seting the location of the person
-             ElevatedButton(
-                onPressed: _isTracking ? captureAndStore : null,
-                child: const Text('Capture Moment'),
-              ),
+              
             ],
           ),
+      
+
+      
         ],
       ),
     );

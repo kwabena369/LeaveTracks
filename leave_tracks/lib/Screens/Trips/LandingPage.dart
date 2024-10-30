@@ -130,20 +130,22 @@ class _LandingPageState extends State<LandingPage> {
                       style: TextStyle(color: Colors.white)),
                 ),
                 //  for the direction to camera pages...
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context)
-                          .pushReplacementNamed("/CameraCapture");
-                    },
-                    child: const Text("test",
-                        style: TextStyle(color: Colors.green, fontSize: 15)))
+                // ElevatedButton(
+                //     onPressed: () {
+                //       Navigator.of(context)
+                //           .pushReplacementNamed("/CameraCapture");
+                //     },
+                //     child: const Text("test",
+                //         style: TextStyle(color: Colors.green, fontSize: 15))
+                //         )
                 //  this is for the routing to the other side
-                ,
+                
                 ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pushReplacementNamed("/DashBoard");
                     },
-                    child: const Text("DashBoard"))
+                    // testing the case change 
+                    child: const Text("_Board"))
                     
               ],
             ),
