@@ -44,14 +44,6 @@ dependencies:
   flutter_webrtc: ^0.9.11
   camera: ^0.10.0
   image_picker: ^1.1.2
-  firebase_core: ^3.4.1
-  firebase_auth: ^5.2.1
-  google_sign_in: ^6.2.1
-  shared_preferences: ^2.0.15
-  flutter_riverpod: ^2.4.0
-  cached_network_image: ^3.3.0
-  connectivity_plus: ^5.0.1
-  pull_to_refresh: ^2.0.0
 
 
 

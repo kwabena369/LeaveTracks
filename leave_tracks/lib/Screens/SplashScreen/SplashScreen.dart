@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -19,20 +18,10 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _scaleAnimation;
   Map<String, dynamic>? _userData;
 
-//  checking for the availability of ther person
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? userJson = prefs.getString('user');
-    if (userJson != null) {
-      setState(() {
-        _userData = json.decode(userJson);
-      });
-    }
-  }
 
   @override
   void initState() {
-    _loadUserData();
+    // _loadUserData();
     super.initState();
 
     _controller = AnimationController(

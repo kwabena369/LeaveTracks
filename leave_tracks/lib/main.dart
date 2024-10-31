@@ -1,6 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:leave_tracks/Screens/Authentication/Authenticate.dart';
 import 'package:leave_tracks/Screens/CameraCapture/CameraScreen.dart';
 import 'package:leave_tracks/Screens/Dashboard/DashBoard.dart';
 import 'package:leave_tracks/Screens/Trips/LandingPage.dart';
@@ -8,10 +6,7 @@ import 'package:leave_tracks/Screens/VideoChat/ReroutingRoutes/RRoute.dart';
 import 'package:leave_tracks/Screens/VideoChat/TestRoom/AIAssistedMap.dart';
 import 'package:leave_tracks/Screens/VideoChat/TestRoom/test.dart';
 
-void main() async {
-    WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  //  the initialization of the firebase case
+void main() {
   runApp(const MyApp());
 }
 
@@ -23,7 +18,7 @@ class MyApp extends StatelessWidget {
     // TODO: implement build
         // TODO: implement build
     return MaterialApp(
-      title: "Sprint",
+      title: "Saint",
       home: const LandingPage(),
       routes: {
         "/Home": (context) => const LandingPage(),
@@ -33,7 +28,7 @@ class MyApp extends StatelessWidget {
         "/TestVideo": (context) => const TestRoom(),
         "/AIshine" : (context)=> const AIAssistedMap(),
         "/CameraCapture":(context)=> const CameraScreen(),
-        "/Authentication": (context) => const AuthScreen(),
+        "/Authentication": (context) => const CameraScreen(),
 
 "/DashBoard":(context)=>const Dashboard(),
         '/route': (context) {
