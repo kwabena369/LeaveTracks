@@ -22,7 +22,7 @@ class UserPicture {
 
 class RealTimeTrackingMap extends StatefulWidget {
   final String tripName;
-
+// I didn't do anything I just 
   const RealTimeTrackingMap({super.key, required this.tripName});
 
   @override
