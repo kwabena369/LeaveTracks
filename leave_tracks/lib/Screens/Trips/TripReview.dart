@@ -13,6 +13,7 @@ class Tripreview extends StatefulWidget {
   @override
   State<Tripreview> createState() => _TripreviewState();
 }
+//ghost are real
 
 class _TripreviewState extends State<Tripreview>
     with SingleTickerProviderStateMixin {
