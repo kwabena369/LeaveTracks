@@ -9,7 +9,7 @@ class Tripreview extends StatefulWidget {
   final String tripId;
 
   const Tripreview({super.key, required this.tripId});
-
+//the classic
   @override
   State<Tripreview> createState() => _TripreviewState();
 }
