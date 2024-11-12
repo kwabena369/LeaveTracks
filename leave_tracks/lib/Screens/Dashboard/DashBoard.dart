@@ -9,7 +9,7 @@ class Dashboard extends StatefulWidget {
   @override
   State<Dashboard> createState() => _DashboardState();
 }
-
+//ghosts are real
 class _DashboardState extends State<Dashboard> {
   static const String baseUrl = 'https://leave-tracks-backend.vercel.app';
   bool _isLoading = true;
