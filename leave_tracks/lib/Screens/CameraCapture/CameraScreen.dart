@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 // hope you are fine 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
-
+// ghost are real 
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
