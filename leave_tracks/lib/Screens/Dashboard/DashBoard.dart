@@ -7,7 +7,7 @@ class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
 
 //hope is on the way
-
+//bold solution 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
