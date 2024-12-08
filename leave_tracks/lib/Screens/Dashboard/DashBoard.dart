@@ -119,6 +119,7 @@ class _DashboardState extends State<Dashboard> {
                         singleRoute['userName']?.toString() ?? 'Unknown User',
                     nameTrip:
                         singleRoute['Name_Route']?.toString() ?? 'Unnamed Trip',
+// wagons
                     onDetailPressed: () {
                       print("Detail pressed for ${singleRoute['Name_Route']}");
                     },
