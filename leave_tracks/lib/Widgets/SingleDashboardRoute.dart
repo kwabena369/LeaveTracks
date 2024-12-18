@@ -11,7 +11,7 @@ class SingleDashboardRoute extends StatelessWidget {
   final VoidCallback onReRoutePressed;
 
   const SingleDashboardRoute({
-    Key? key,
+    super.key,
     required this.id,
     required this.previewFile,
     required this.userProfile,
@@ -20,7 +20,7 @@ class SingleDashboardRoute extends StatelessWidget {
     required this.onDetailPressed,
     required this.onEditPressed,
     required this.onReRoutePressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

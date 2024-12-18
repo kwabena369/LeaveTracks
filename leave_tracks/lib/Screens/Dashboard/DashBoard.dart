@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:leave_tracks/Widgets/SingleDashboardRoute.dart';
 //there is hope
 class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+  const Dashboard({super.key});
 
 
 // where is the man
@@ -151,10 +151,10 @@ class EditRouteModal extends StatefulWidget {
   final Function(String) onSave;
 
   const EditRouteModal({
-    Key? key,
+    super.key,
     required this.routeName,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _EditRouteModalState createState() => _EditRouteModalState();
@@ -178,23 +178,23 @@ class _EditRouteModalState extends State<EditRouteModal> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit Route Name'),
+      title: const Text('Edit Route Name'),
       content: TextField(
         controller: _controller,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Route Name',
           border: OutlineInputBorder(),
         ),
       ),
       actions: <Widget>[
         TextButton(
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         ElevatedButton(
-          child: Text('Save'),
+          child: const Text('Save'),
           onPressed: () {
             widget.onSave(_controller.text);
           },
