@@ -1,6 +1,5 @@
 //  this is the function for bring all the the trip and thier locationCordinate
 import 'package:http/http.dart' as http;
-
 //  the baseUrl
 const String baseUrl = 'https://leave-tracks-backend.vercel.app';
 //the root element 

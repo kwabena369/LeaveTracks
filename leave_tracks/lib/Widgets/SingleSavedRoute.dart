@@ -13,7 +13,7 @@ class SingleSavedRoute extends StatelessWidget {
     required this.previewFile,
     required this.userProfile,
     required this.userName,
-    required this.nameTrip,
+    required this.nameTrip, required Future Function() onTap,
   });
 
   @override
