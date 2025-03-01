@@ -27,16 +27,42 @@ const RouteSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  //  this section is a section that is definately not required
+  // New fields for likes, privacy, etc.
+  likes: {
+    type: Number,
+    default: 0
+  },
+  dislikes: {
+    type: Number,
+    default: 0
+  },
+  // View counter to track number of viewers
+  views: {
+    type: Number,
+    default: 0
+  },
+  // Optional: Track unique viewers
+  uniqueViewers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  isPublic: {
+    type: Boolean,
+    default: true
+  },
+  authorizedViewers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  // This section is for memories
   MemoriesTrip: [
     {
       ImageContent: String,
       Location: {
         lat: Number,
-        long : Number
+        long: Number
       }
     }
-    
   ]
 });
 

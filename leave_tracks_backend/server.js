@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const compression = require('compression');
+const Comment = require("./models/Comment");
 
 const TripRoute = require("./models/Routes")
 
@@ -103,6 +104,164 @@ app.post("/UploadImage", async (req,res) => {
   console.log(Content);
 })
 
+
+
+// Get comments for a specific route
+app.get("/comments/:routeId", async (req, res) => {
+  try {
+    const comments = await Comment.find({ routeId: req.params.routeId })
+      .sort({ createdAt: -1 }); // Sort by newest first
+    
+    res.status(200).json(comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ message: "Failed to fetch comments", error: error.message });
+  }
+});
+
+// Add a new comment
+app.post("/comments", async (req, res) => {
+  try {
+    const { routeId, userId, userName, userProfile, content } = req.body;
+    
+    if (!routeId || !userId || !userName || !content) {
+      return res.status(400).json({ 
+        message: "Missing required fields",
+        received: { routeId, userId, userName, content }
+      });
+    }
+    
+    const newComment = new Comment({
+      routeId,
+      userId,
+      userName,
+      userProfile: userProfile || "/cat.png",
+      content
+    });
+    
+    await newComment.save();
+    
+    res.status(201).json({ 
+      message: "Comment added successfully", 
+      comment: newComment 
+    });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ 
+      message: "Failed to add comment", 
+      error: error.message
+    });
+  }
+});
+
+// Like a route
+app.post("/routes/like/:id", async (req, res) => {
+  try {
+    const route = await TripRoute.findById(req.params.id);
+    
+    if (!route) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+    
+    route.likes += 1;
+    await route.save();
+    
+    res.status(200).json({ 
+      message: "Route liked successfully", 
+      likes: route.likes 
+    });
+  } catch (error) {
+    console.error("Error liking route:", error);
+    res.status(500).json({ 
+      message: "Failed to like route", 
+      error: error.message 
+    });
+  }
+});
+
+// Dislike a route
+app.post("/routes/dislike/:id", async (req, res) => {
+  try {
+    const route = await TripRoute.findById(req.params.id);
+    
+    if (!route) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+    
+    route.dislikes += 1;
+    await route.save();
+    
+    res.status(200).json({ 
+      message: "Route disliked successfully", 
+      dislikes: route.dislikes 
+    });
+  } catch (error) {
+    console.error("Error disliking route:", error);
+    res.status(500).json({ 
+      message: "Failed to dislike route", 
+      error: error.message 
+    });
+  }
+});
+
+// Update route privacy
+app.put("/routes/privacy/:id", async (req, res) => {
+  try {
+    const { isPublic, authorizedViewers } = req.body;
+    
+    if (isPublic === undefined) {
+      return res.status(400).json({ message: "Missing isPublic field" });
+    }
+    
+    const updateData = { isPublic };
+    
+    // If route is private and authorizedViewers are provided
+    if (!isPublic && authorizedViewers && Array.isArray(authorizedViewers)) {
+      updateData.authorizedViewers = authorizedViewers;
+    }
+    
+    const route = await TripRoute.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+    
+    if (!route) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+    
+    res.status(200).json({ 
+      message: "Route privacy updated successfully", 
+      route 
+    });
+  } catch (error) {
+    console.error("Error updating route privacy:", error);
+    res.status(500).json({ 
+      message: "Failed to update route privacy", 
+      error: error.message 
+    });
+  }
+});
+
+// Get public routes or routes the user is authorized to view
+app.get("/routes/accessible/:userId", async (req, res) => {
+  try {
+    const routes = await TripRoute.find({
+      $or: [
+        { isPublic: true },
+        { authorizedViewers: req.params.userId }
+      ]
+    });
+    
+    res.status(200).json(routes);
+  } catch (error) {
+    console.error("Error fetching accessible routes:", error);
+    res.status(500).json({ 
+      message: "Failed to fetch accessible routes", 
+      error: error.message 
+    });
+  }
+});
 
 
 app.post("/Routes", async (req, res) => {
@@ -225,6 +384,86 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Endpoint to increment view count when a route is viewed
+app.post("/routes/view/:id", async (req, res) => {
+  try {
+    const { userId } = req.body; // Optional: If you want to track unique viewers
+    
+    const route = await TripRoute.findById(req.params.id);
+    
+    if (!route) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+    
+    // Increment the view count
+    route.views += 1;
+    
+    // If userId is provided and user hasn't viewed this route before
+    if (userId && !route.uniqueViewers.includes(userId)) {
+      route.uniqueViewers.push(userId);
+    }
+    
+    await route.save();
+    
+    res.status(200).json({ 
+      message: "View counted successfully", 
+      views: route.views,
+      uniqueViewers: route.uniqueViewers.length
+    });
+  } catch (error) {
+    console.error("Error counting view:", error);
+    res.status(500).json({ 
+      message: "Failed to count view", 
+      error: error.message 
+    });
+  }
+});
+
+// Get route with view count
+app.get("/routes/stats/:id", async (req, res) => {
+  try {
+    const route = await TripRoute.findById(req.params.id);
+    
+    if (!route) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+    
+    res.status(200).json({
+      routeId: route._id,
+      name: route.Name_Route,
+      views: route.views,
+      uniqueViewers: route.uniqueViewers.length,
+      likes: route.likes,
+      dislikes: route.dislikes,
+      commentCount: await Comment.countDocuments({ routeId: route._id })
+    });
+  } catch (error) {
+    console.error("Error getting route stats:", error);
+    res.status(500).json({ 
+      message: "Failed to get route stats", 
+      error: error.message 
+    });
+  }
+});
+
+// Get most viewed routes (could be useful for "trending" or "popular" routes)
+app.get("/routes/popular", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const popularRoutes = await TripRoute.find({ isPublic: true })
+      .sort({ views: -1 })
+      .limit(limit);
+    
+    res.status(200).json(popularRoutes);
+  } catch (error) {
+    console.error("Error getting popular routes:", error);
+    res.status(500).json({ 
+      message: "Failed to get popular routes", 
+      error: error.message 
+    });
+  }
+});
 
 
 module.exports = app;
