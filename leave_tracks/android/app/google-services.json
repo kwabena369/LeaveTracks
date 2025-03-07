@@ -8,20 +8,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:464189532638:android:43caeebce40b2e183d954f",
+        "mobilesdk_app_id": "1:464189532638:android:be2a7eca9cddcd803d954f",
         "android_client_info": {
-          "package_name": "Serwaa.Ama"
+          "package_name": "com.trackime.app"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "464189532638-cfsfkdhtg3mbafsrlctov3pbjdtc78qu.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "Serwaa.Ama",
-            "certificate_hash": "63c155d85962e139c570f331d3be0b17cfd77262"
-          }
-        },
         {
           "client_id": "464189532638-c6bdoiuplltjok0k3fn88qt3sp5ar7ek.apps.googleusercontent.com",
           "client_type": 3

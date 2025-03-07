@@ -21,5 +21,32 @@ AuthenticationRouter.get("/AllUser",  async(req,res)=>{
      }
 })
 
+AuthenticationRouter.post('/sync', async (req, res) => {
+  try {
+    const { uid, username, email, googleid, avatar_url } = req.body;
+    
+    let user = await Userscheman.findOne({ $or: [{ uid }, { email }] });
+    
+    if (!user) {
+      user = new Userscheman({
+        username,
+        Email: email,
+        googleid,
+        avatar_url,
+        uid,
+      });
+    } else {
+      user.username = username || user.username;
+      user.avatar_url = avatar_url || user.avatar_url;
+      user.updateAt = Date.now();
+    }
+    
+    await user.save();
+    res.status(201).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: `Error: ${error.message}` });
+  }
+});
 
 module.exports = AuthenticationRouter

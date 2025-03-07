@@ -1,4 +1,4 @@
-package com.example.leave_tracks
+package com.trackime.app
 
 import io.flutter.embedding.android.FlutterActivity
 
